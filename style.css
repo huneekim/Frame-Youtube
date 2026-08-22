@@ -5,6 +5,7 @@
   --sidebar-line: #ddd;
   --sidebar-ink: #222;
   --sidebar-sub: #777;
+  --sidebar-green: #2ba640;
   --sidebar-red: #d9534f;
 
   --bg: #fff;
@@ -42,6 +43,23 @@ body {
 
   width: 100vw;
   height: 100vh;
+}
+
+.field-label {
+  display: block;
+  font-size: 12px;
+  color: var(--sidebar-sub);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.inline-field {
+  display: inline;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+  color: inherit;
+  white-space: nowrap;
 }
 
 /* sidebar layout */
@@ -86,7 +104,7 @@ body {
   width: 80px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--sidebar-line);
+  border-right: 1px solid rgb(238, 238, 238);
   background: var(--sidebar-bg);
   overflow-y: auto;
 }
@@ -183,24 +201,6 @@ body {
   cursor: pointer;
 }
 
-.field-label {
-  display: block;
-  font-size: 12px;
-  color: var(--sidebar-sub);
-  margin-bottom: 4px;
-  font-weight: 500;
-}
-
-/* 동적으로 삽입된 필드는 부모의 font-size를 상속받고 인라인으로 흐르도록 함 */
-.inline-field {
-  display: inline;
-  font-size: inherit;
-  line-height: inherit;
-  font-weight: inherit;
-  color: inherit;
-  white-space: nowrap;
-}
-
 /* Save, Capture, Reset */
 .saveBtn,
 .captureBtn,
@@ -243,6 +243,14 @@ body {
   cursor: default;
   pointer-events: none;
 }
+
+/* save */
+
+.saveBtn.is-saved {
+  background: var(--sidebar-green);
+  border-color: var(--sidebar-green);
+  color: var(--sidebar-bg);
+}
 /* Stack mode toggle */
 .stack-toggle-row {
   display: flex;
@@ -274,7 +282,7 @@ body {
   position: absolute;
   cursor: pointer;
   inset: 0;
-  background-color: #ccc;
+  background-color: var(--sidebar-sub);
   border-radius: 22px;
   transition: background-color 0.15s ease;
 }
@@ -286,7 +294,7 @@ body {
   width: 16px;
   left: 3px;
   bottom: 3px;
-  background-color: var(--bg);
+  background-color: var(--sidebar-bg);
   border-radius: 50%;
   transition: transform 0.15s ease;
 }
@@ -297,6 +305,75 @@ body {
 
 .switch input:checked + .switch-slider::before {
   transform: translateX(18px);
+}
+
+/* reset */
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 3;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal-box {
+  background: var(--sidebar-bg);
+  border-radius: 14px;
+  padding: 26px 24px;
+  width: 320px;
+  max-width: calc(100vw - 40px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+
+.modal-desc {
+  font-size: 12px;
+  color: var(--sidebar-sub);
+  margin: 0 0 20px;
+  line-height: 1.6;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.modalBtn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--sidebar-line);
+  background: var(--sidebar-bg);
+}
+
+.modalBtn.cancel:hover {
+  background: var(--sidebar-bg);
+}
+
+.modalBtn.confirm {
+  border-color: var(--sidebar-red);
+  background: var(--sidebar-red);
+  color: white;
+}
+
+.modalBtn.confirm:hover {
+  opacity: 0.88;
 }
 
 /* Layout */
@@ -553,7 +630,8 @@ body.stack-mode .comment {
   content: "";
   border-style: solid;
   border-width: 5px 0 5px 8px;
-  border-color: transparent transparent transparent var(--bg);
+  border-color: transparent transparent transparent
+    var(--bg);
   margin-left: 2px;
 }
 
@@ -1172,7 +1250,7 @@ body.stack-mode .comment {
 }
 
 .playlist-item:hover {
-  background: var(--bg);
+  background: #f9f9f9;
 }
 
 .playlist-index {
@@ -1268,8 +1346,8 @@ body.stack-mode .comment {
 }
 
 .chip.active {
-  background: var(--chip-active)
-  color: var(--chip);
+  background: #0f0f0f;
+  color: var(--bg);
 }
 
 .chip-next {
@@ -1365,80 +1443,11 @@ body.stack-mode .comment {
 
 .label-tag {
   font-size: 1rem;
-  color: var(--chip);
-  background: var(--sub);
+  color: var(--bg);
+  background: #999;
   border-radius: 3px;
   padding: 1px 5px;
   vertical-align: middle;
   margin-left: 4px;
   font-weight: 400;
-}
-
-/* reset */
-
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 3;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-overlay.open {
-  display: flex;
-}
-
-.modal-box {
-  background: var(--sidebar-bg);
-  border-radius: 14px;
-  padding: 26px 24px;
-  width: 320px;
-  max-width: calc(100vw - 40px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-.modal-title {
-  font-size: 15px;
-  font-weight: 700;
-  margin: 0 0 8px;
-  color: var(--sidebar-ink);
-}
-
-.modal-desc {
-  font-size: 12px;
-  color: var(--sub);
-  margin: 0 0 20px;
-  line-height: 1.6;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.modalBtn {
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid var(--sidebar-line);
-  background: var(--sidebar-bg);
-}
-
-.modalBtn.cancel:hover {
-  background: var(--sidebar-bg);
-}
-
-.modalBtn.confirm {
-  border-color: var(--sidebar-red);
-  background: var(--sidebar-red);
-  color: var(--sidebar-bg);
-}
-
-.modalBtn.confirm:hover {
-  opacity: 0.88;
 }

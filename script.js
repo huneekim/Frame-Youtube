@@ -18,25 +18,29 @@ function switchTab(tab) {
     });
 }
 
+function renderBoundInput(input) {
+  var targetId = input.dataset.bind;
+  var target = document.getElementById(targetId);
+  if (!target) return;
+
+  if (input.dataset.multiline === "true") {
+    target.innerHTML = input.value
+      .split("\n")
+      .map(function (line) {
+        return line;
+      })
+      .join("<br />");
+  } else {
+    target.textContent = input.value;
+  }
+}
+
 function bindInputs() {
   document
     .querySelectorAll("[data-bind]")
     .forEach(function (input) {
-      var targetId = input.dataset.bind;
-      var target = document.getElementById(targetId);
-      if (!target) return;
-
       input.addEventListener("input", function () {
-        if (input.dataset.multiline === "true") {
-          target.innerHTML = input.value
-            .split("\n")
-            .map(function (line) {
-              return line;
-            })
-            .join("<br />");
-        } else {
-          target.textContent = input.value;
-        }
+        renderBoundInput(input);
       });
     });
 }
@@ -117,6 +121,16 @@ function bindImageEditing() {
       wrap.__imgEditBound = true;
 
       var state = { scale: 1, offsetX: 0, offsetY: 0 };
+      wrap.__imgState = state;
+
+      wrap.__setImgTransform = function (nextState) {
+        if (!nextState) return;
+        state.scale = nextState.scale || 1;
+        state.offsetX = nextState.offsetX || 0;
+        state.offsetY = nextState.offsetY || 0;
+        clamp();
+        apply();
+      };
 
       function geometry() {
         var iw = wrap.__naturalW,
@@ -309,13 +323,13 @@ function toggleStackMode(isOn) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+  captureInitialState();
   bindInputs();
   bindSnippet();
   bindImageInputs();
   bindImageEditing();
+  loadSavedState();
   runLayoutChecks();
-  captureInitialValues();
-  loadStateFromCookie();
 });
 
 document.addEventListener("input", updateActionRowOverflow);
@@ -443,128 +457,232 @@ async function captureImage() {
   }
 }
 
-// ===== 사이드바 입력값 쿠키 저장 / 초기화 =====
+// ---------------------------------------------------------
+// 상태 저장 / 초기화
+// ---------------------------------------------------------
 
-var STATE_COOKIE_NAME = "hunee_pair_frame_state";
-var STATE_COOKIE_DAYS = 365;
+var SAVE_STORAGE_KEY = "hunee-pair-frame-state-v1";
 
-// 저장 대상: 사진(input[type=file])을 제외한 사이드바 입력 요소 전부
-function getPersistableInputs() {
+// 페이지 최초 로드 시점의 값(초기화 버튼이 되돌아갈 기준)
+var initialState = null;
+
+function getAllTextInputs() {
   return Array.prototype.slice.call(
-    document.querySelectorAll(
-      ".sidebar input:not([type='file']), .sidebar textarea",
-    ),
+    document.querySelectorAll("[data-bind]"),
   );
 }
 
-function setCookie(name, value, days) {
-  var expires = "";
-  if (days) {
-    var date = new Date();
-    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-    expires = "; expires=" + date.toUTCString();
-  }
-  document.cookie =
-    name + "=" + encodeURIComponent(value) + expires + "; path=/; SameSite=Lax";
+function getSnippetInput() {
+  return document.getElementById("snippet-input");
 }
 
-function getCookie(name) {
-  var match = document.cookie.match(
-    new RegExp("(?:^|; )" + name + "=([^;]*)"),
+function getAllImageWraps() {
+  return Array.prototype.slice.call(
+    document.querySelectorAll(".img-editable"),
   );
-  return match ? decodeURIComponent(match[1]) : null;
 }
 
-function deleteCookie(name) {
-  document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-}
+// 현재 DOM 상태를 하나의 직렬화 가능한 객체로 수집
+function collectCurrentState() {
+  var state = {
+    texts: {},
+    snippet: "",
+    stackMode: false,
+    images: {},
+  };
 
-// 각 입력 요소를 구분할 고유 키 (없으면 저장/복원 대상에서 제외)
-function inputStateKey(input) {
-  return input.id || input.dataset.bind || null;
-}
-
-// 페이지 최초 로드 시점의 입력값을 메모리에 보관 (초기화용)
-var initialInputValues = {};
-
-function captureInitialValues() {
-  getPersistableInputs().forEach(function (input) {
-    var key = inputStateKey(input);
-    if (!key) return;
-    initialInputValues[key] = input.value;
+  getAllTextInputs().forEach(function (input) {
+    state.texts[input.dataset.bind] = input.value;
   });
+
+  var snippetInput = getSnippetInput();
+  if (snippetInput) {
+    state.snippet = snippetInput.value;
+  }
+
+  var stackToggle = document.getElementById("stackModeToggle");
+  state.stackMode = !!(stackToggle && stackToggle.checked);
+
+  getAllImageWraps().forEach(function (wrap) {
+    var layer = wrap.querySelector(".img-fill");
+    if (!layer) return;
+    var hasImage = wrap.classList.contains("has-image");
+    if (!hasImage) return;
+
+    var bg = layer.style.backgroundImage; // 'url("data:...")'
+    var match = bg && bg.match(/^url\((['"]?)(.*)\1\)$/);
+    var dataUrl = match ? match[2] : "";
+    if (!dataUrl) return;
+
+    state.images[layer.id] = {
+      dataUrl: dataUrl,
+      naturalW: wrap.__naturalW || 0,
+      naturalH: wrap.__naturalH || 0,
+      imgState: wrap.__imgState
+        ? {
+            scale: wrap.__imgState.scale,
+            offsetX: wrap.__imgState.offsetX,
+            offsetY: wrap.__imgState.offsetY,
+          }
+        : null,
+    };
+  });
+
+  return state;
 }
 
-// [현재 상태 저장] 버튼
+// 페이지 로드시 최초 상태(HTML 기본값)를 기록해 둔다.
+// 이미지는 최초 로드시 비어 있으므로 텍스트/토글 값만 기록.
+function captureInitialState() {
+  initialState = collectCurrentState();
+}
+
+// state 객체를 DOM에 반영
+function applyState(state) {
+  if (!state) return;
+
+  // 텍스트 입력값 복원
+  getAllTextInputs().forEach(function (input) {
+    var key = input.dataset.bind;
+    if (Object.prototype.hasOwnProperty.call(state.texts || {}, key)) {
+      input.value = state.texts[key];
+      renderBoundInput(input);
+    }
+  });
+
+  // 설명(3줄 스니펫) 복원
+  var snippetInput = getSnippetInput();
+  if (snippetInput && typeof state.snippet === "string") {
+    snippetInput.value = state.snippet;
+    snippetInput.dispatchEvent(new Event("input"));
+  }
+
+  // 모바일 스택 뷰 토글 복원
+  var stackToggle = document.getElementById("stackModeToggle");
+  if (stackToggle) {
+    stackToggle.checked = !!state.stackMode;
+    toggleStackMode(stackToggle.checked);
+  }
+
+  // 이미지 복원
+  getAllImageWraps().forEach(function (wrap) {
+    var layer = wrap.querySelector(".img-fill");
+    if (!layer) return;
+
+    var saved = state.images ? state.images[layer.id] : null;
+
+    if (!saved) {
+      // 저장된 이미지가 없으면 비워둔다(초기 상태로 되돌릴 때 사용)
+      layer.style.backgroundImage = "";
+      layer.style.backgroundSize = "";
+      layer.style.backgroundPosition = "";
+      wrap.classList.remove("has-image");
+      wrap.__naturalW = 0;
+      wrap.__naturalH = 0;
+      if (wrap.__imgState) {
+        wrap.__imgState.scale = 1;
+        wrap.__imgState.offsetX = 0;
+        wrap.__imgState.offsetY = 0;
+      }
+      return;
+    }
+
+    layer.style.backgroundImage = "url(" + saved.dataUrl + ")";
+    wrap.classList.add("has-image");
+    wrap.__naturalW = saved.naturalW;
+    wrap.__naturalH = saved.naturalH;
+
+    if (typeof wrap.__setImgTransform === "function") {
+      if (saved.imgState) {
+        wrap.__setImgTransform(saved.imgState);
+      } else if (typeof wrap.__resetImgTransform === "function") {
+        wrap.__resetImgTransform();
+      }
+    }
+  });
+
+  runLayoutChecks();
+}
+
+// save
 function manualSave() {
-  var state = {};
-  getPersistableInputs().forEach(function (input) {
-    var key = inputStateKey(input);
-    if (!key) return;
-    state[key] = input.value;
-  });
-
   try {
-    setCookie(STATE_COOKIE_NAME, JSON.stringify(state), STATE_COOKIE_DAYS);
-    showSaveFeedback(true);
+    var state = collectCurrentState();
+    var json = JSON.stringify(state);
+    window.localStorage.setItem(SAVE_STORAGE_KEY, json);
+    showSavedOnButton();
   } catch (err) {
-    console.error("상태 저장에 실패했습니다.", err);
-    showSaveFeedback(false);
+    console.error("상태 저장에 실패하였습니다.", err);
+    alert(
+      "상태 저장에 실패했습니다: " +
+        (err && err.message ? err.message : String(err)),
+    );
   }
 }
 
-function showSaveFeedback(success) {
-  var btn = document.getElementById("saveBtn");
-  if (!btn) return;
-  var original = btn.textContent;
-  btn.textContent = success ? "저장됨!" : "저장 실패";
-  btn.disabled = true;
-  setTimeout(function () {
-    btn.textContent = original;
-    btn.disabled = false;
-  }, 1200);
-}
-
-// 쿠키에 저장된 값을 입력에 적용하고 관련 렌더링(input 이벤트)을 트리거
-function applyStateToInputs(state) {
-  getPersistableInputs().forEach(function (input) {
-    var key = inputStateKey(input);
-    if (!key || !(key in state)) return;
-    input.value = state[key];
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-  });
-}
-
-// 페이지 로드시 쿠키에 저장된 상태가 있으면 복원
-function loadStateFromCookie() {
-  var raw = getCookie(STATE_COOKIE_NAME);
-  if (!raw) return;
-
+// auto load
+function loadSavedState() {
+  var json;
   try {
-    var state = JSON.parse(raw);
-    applyStateToInputs(state);
+    json = window.localStorage.getItem(SAVE_STORAGE_KEY);
   } catch (err) {
     console.error("저장된 상태를 불러오지 못했습니다.", err);
+    return;
+  }
+  if (!json) return;
+
+  try {
+    var state = JSON.parse(json);
+    applyState(state);
+  } catch (err) {
+    console.error("저장된 상태 파싱에 실패하였습니다.", err);
   }
 }
 
-// [초기화] 버튼 -> 확인 모달 표시
+// save button change
+var saveBtnResetTimer = null;
+var SAVE_BTN_DEFAULT_TEXT = "현재 상태 저장";
+var SAVE_BTN_SAVED_TEXT = "저장됨";
+
+function showSavedOnButton() {
+  var btn = document.getElementById("saveBtn");
+  if (!btn) return;
+
+  btn.textContent = SAVE_BTN_SAVED_TEXT;
+  btn.classList.add("is-saved");
+
+  if (saveBtnResetTimer) clearTimeout(saveBtnResetTimer);
+  saveBtnResetTimer = setTimeout(function () {
+    btn.textContent = SAVE_BTN_DEFAULT_TEXT;
+    btn.classList.remove("is-saved");
+  }, 1800);
+}
+
+// reset
+
 function requestReset() {
   var overlay = document.getElementById("resetModalOverlay");
-  if (overlay) overlay.classList.add("open");
+  if (!overlay) return;
+  overlay.classList.add("open");
 }
 
-// 모달 [아니오]
 function cancelReset() {
   var overlay = document.getElementById("resetModalOverlay");
-  if (overlay) overlay.classList.remove("open");
+  if (!overlay) return;
+  overlay.classList.remove("open");
 }
 
-// 모달 [예] -> 최초 입력값으로 복원 + 저장된 쿠키 삭제
+// reset yes
 function confirmReset() {
-  applyStateToInputs(initialInputValues);
-  deleteCookie(STATE_COOKIE_NAME);
+  try {
+    window.localStorage.removeItem(SAVE_STORAGE_KEY);
+  } catch (err) {
+    console.error("저장된 상태 삭제에 실패하였습니다.", err);
+  }
 
-  var overlay = document.getElementById("resetModalOverlay");
-  if (overlay) overlay.classList.remove("open");
+  if (initialState) {
+    applyState(initialState);
+  }
+
+  cancelReset();
 }
