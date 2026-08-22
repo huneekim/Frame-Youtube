@@ -1,0 +1,1071 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>HUNEE Pair Frame: Youtube</title>
+
+	<link rel="stylesheet" href="style.css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+	<script src="script.js"></script>
+</head>
+
+<body>
+	<!-- Sidebar -->
+	<aside class="sidebar">
+		<header class="sidebar__header">
+			<button class="saveBtn" id="saveBtn" onclick="manualSave()">
+				현재 상태 저장
+			</button>
+			<button class="captureBtn" id="captureBtn" onclick="captureImage()">
+				이미지로 저장
+			</button>
+			<button class="resetBtn" id="resetBtn" onclick="requestReset()">
+				초기화
+			</button>
+		</header>
+		<header class="sidebar__header2">
+			<div class="stack-toggle-row">
+				<span class="stack-toggle-label">모바일 (세로 스택) 뷰</span>
+				<label class="switch">
+					<input type="checkbox" id="stackModeToggle" onchange="toggleStackMode(this.checked)" />
+					<span class="switch-slider"></span>
+				</label>
+			</div>
+		</header>
+
+
+		<div class="sidebar__body">
+			<nav class="sidebar__tabs">
+				<button class="tabBtn active" data-tab="playing" onclick="switchTab('playing')">
+					재생 중
+				</button>
+				<button class="tabBtn" data-tab="comments" onclick="switchTab('comments')">
+					댓글
+				</button>
+				<button class="tabBtn" data-tab="playlist-header" onclick="switchTab('playlist-header')">
+					재생목록<br>헤더
+				</button>
+				<button class="tabBtn" data-tab="playlist-list" onclick="switchTab('playlist-list')">
+					재생목록<br>리스트
+				</button>
+				<button class="tabBtn" data-tab="recommend" onclick="switchTab('recommend')">
+					추천 영상
+				</button>
+			</nav>
+
+			<div class="sidebar__panels">
+
+				<!-- 재생 중 -->
+				<section class="tab-panel active" id="panel-playing">
+					<h2 class="sidebar__label">영상 정보</h2>
+					<label class="field-label">영상 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-player" />
+					<label class="field-label">영상 제목</label>
+					<input class="sidebar__input" data-bind="out-video-title" value="영상 제목" />
+
+					<h2 class="sidebar__label">채널 정보</h2>
+					<label class="field-label">채널 프로필 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-channel-avatar" />
+					<label class="field-label">채널명</label>
+					<input class="sidebar__input" data-bind="out-channel-name" value="채널명" />
+					<label class="field-label">구독자 수</label>
+					<input class="sidebar__input" data-bind="out-sub-count" value="NNN" />
+
+					<h2 class="sidebar__label">좋아요</h2>
+					<input class="sidebar__input" data-bind="out-like-count" value="NNN" />
+
+					<h2 class="sidebar__label">영상 설명</h2>
+					<label class="field-label">조회수</label>
+					<input class="sidebar__input" data-bind="out-views" value="NNN" />
+					<label class="field-label">업로드 날짜</label>
+					<input class="sidebar__input" data-bind="out-upload-date" value="업로드 날짜" />
+
+					<label class="field-label">설명 (총 3줄, 마지막 줄은 더보기 접힘)</label>
+					<textarea class="sidebar__input sidebar__textarea" id="snippet-input" data-snippet-lines="3">가나다라
+마바사
+마지막</textarea>
+
+					<label class="field-label">해시태그</label>
+					<input class="sidebar__input" data-bind="out-hashtag-1" value="#해시태그1" />
+					<input class="sidebar__input" data-bind="out-hashtag-2" value="#해시태그2" />
+					<input class="sidebar__input" data-bind="out-hashtag-3" value="#해시태그3" />
+				</section>
+
+				<!-- 댓글 -->
+				<section class="tab-panel" id="panel-comments">
+					<h2 class="sidebar__label">내 프로필</h2>
+					<label class="field-label">내 프로필 사진 (헤더 · 댓글 입력창)</label>
+					<input type="file" accept="image/*" class="sidebar__file"
+						data-img-bind="img-my-avatar img-comment-input-avatar" />
+
+					<h2 class="sidebar__label">댓글 정보</h2>
+					<label class="field-label">댓글 개수</label>
+					<input class="sidebar__input" data-bind="out-comment-count" value="NNN" />
+
+					<h2 class="sidebar__label">댓글</h2>
+					<label class="field-label">프로필 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-comment-avatar" />
+					<label class="field-label">@아이디</label>
+					<input class="sidebar__input" data-bind="out-comment-author" value="@아이디" />
+					<label class="field-label">작성 시간</label>
+					<input class="sidebar__input" data-bind="out-comment-time" value="작성 시간" />
+					<label class="field-label">댓글 본문 내용</label>
+					<textarea class="sidebar__input sidebar__textarea" data-bind="out-comment-text" data-multiline="true">댓글 본문 내용
+가나다라</textarea>
+
+					<h2 class="sidebar__label">대댓글</h2>
+					<label class="field-label">프로필 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-reply-avatar" />
+					<label class="field-label">@아이디</label>
+					<input class="sidebar__input" data-bind="out-reply-author" value="@아이디" />
+					<label class="field-label">작성 시간</label>
+					<input class="sidebar__input" data-bind="out-reply-time" value="작성 시간" />
+					<label class="field-label">대댓글 본문 내용</label>
+					<textarea class="sidebar__input sidebar__textarea" data-bind="out-reply-text"
+						data-multiline="true">대댓글 본문 내용</textarea>
+
+					<h2 class="sidebar__label">크리에이터 하트</h2>
+					<label class="field-label">하트를 남긴 채널 프로필 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-heart-avatar" />
+				</section>
+
+				<!-- 재생목록 헤더 -->
+				<section class="tab-panel" id="panel-playlist-header">
+					<h2 class="sidebar__label">재생목록 정보</h2>
+					<label class="field-label">재생목록 제목</label>
+					<input class="sidebar__input" data-bind="out-playlist-title" value="재생목록 제목" />
+					<label class="field-label">채널명</label>
+					<input class="sidebar__input" data-bind="out-playlist-channel" value="채널명" />
+					<label class="field-label">현재 순번</label>
+					<input class="sidebar__input" data-bind="out-playlist-current" value="현재 순번" />
+					<label class="field-label">전체 개수</label>
+					<input class="sidebar__input" data-bind="out-playlist-total" value="전체 개수" />
+				</section>
+
+				<!-- 재생목록 리스트 -->
+				<section class="tab-panel" id="panel-playlist-list">
+					<h2 class="sidebar__label">현재 재생 중</h2>
+					<label class="field-label">썸네일 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-playlist-thumb-1" />
+					<label class="field-label">제목</label>
+					<input class="sidebar__input" data-bind="out-playlist-item-title-1" value="현재 재생 중인 영상 제목" />
+					<label class="field-label">업로더명</label>
+					<input class="sidebar__input" data-bind="out-playlist-item-channel-1" value="업로더명" />
+
+					<h2 class="sidebar__label">재생 목록</h2>
+					<label class="field-label">썸네일 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-playlist-thumb-2" />
+					<label class="field-label">제목</label>
+					<input class="sidebar__input" data-bind="out-playlist-item-title-2" value="재생목록 영상 제목 2" />
+					<label class="field-label">업로더명</label>
+					<input class="sidebar__input" data-bind="out-playlist-item-channel-2" value="업로더명" />
+
+					<h2 class="sidebar__label">재생 목록 3</h2>
+					<label class="field-label">썸네일 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-playlist-thumb-3" />
+					<label class="field-label">제목</label>
+					<input class="sidebar__input" data-bind="out-playlist-item-title-3" value="재생목록 영상 제목 3" />
+					<label class="field-label">업로더명</label>
+					<input class="sidebar__input" data-bind="out-playlist-item-channel-3" value="업로더명" />
+
+					<h2 class="sidebar__label">재생 목록 4</h2>
+					<label class="field-label">썸네일 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-playlist-thumb-4" />
+					<label class="field-label">제목</label>
+					<input class="sidebar__input" data-bind="out-playlist-item-title-4" value="재생목록 영상 제목 4" />
+					<label class="field-label">업로더명</label>
+					<input class="sidebar__input" data-bind="out-playlist-item-channel-4" value="업로더명" />
+
+					<h2 class="sidebar__label">재생 목록 5</h2>
+					<label class="field-label">썸네일 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-playlist-thumb-5" />
+					<label class="field-label">제목</label>
+					<input class="sidebar__input" data-bind="out-playlist-item-title-5" value="재생목록 영상 제목 5" />
+					<label class="field-label">업로더명</label>
+					<input class="sidebar__input" data-bind="out-playlist-item-channel-5" value="업로더명" />
+
+					<h2 class="sidebar__label">재생 목록 6</h2>
+					<label class="field-label">썸네일 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-playlist-thumb-6" />
+					<label class="field-label">제목</label>
+					<input class="sidebar__input" data-bind="out-playlist-item-title-6" value="재생목록 영상 제목 6" />
+					<label class="field-label">업로더명</label>
+					<input class="sidebar__input" data-bind="out-playlist-item-channel-6" value="업로더명" />
+				</section>
+
+				<!-- 추천 영상 -->
+				<section class="tab-panel" id="panel-recommend">
+					<h2 class="sidebar__label">추천 영상 1</h2>
+					<label class="field-label">썸네일 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-rec-thumb-1" />
+					<label class="field-label">제목</label>
+					<input class="sidebar__input" data-bind="out-rec-title-1" value="추천 영상 제목 1" />
+					<label class="field-label">채널명</label>
+					<input class="sidebar__input" data-bind="out-rec-channel-1" value="채널명" />
+					<label class="field-label">조회수</label>
+					<input class="sidebar__input" data-bind="out-rec-views-1" value="조회수" />
+					<label class="field-label">업로드 시점</label>
+					<input class="sidebar__input" data-bind="out-rec-time-1" value="업로드 시점" />
+
+					<h2 class="sidebar__label">추천 영상 2</h2>
+					<label class="field-label">썸네일 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-rec-thumb-2" />
+					<label class="field-label">제목</label>
+					<input class="sidebar__input" data-bind="out-rec-title-2" value="추천 영상 제목 2" />
+					<label class="field-label">채널명</label>
+					<input class="sidebar__input" data-bind="out-rec-channel-2" value="채널명" />
+					<label class="field-label">조회수</label>
+					<input class="sidebar__input" data-bind="out-rec-views-2" value="조회수" />
+					<label class="field-label">업로드 시점</label>
+					<input class="sidebar__input" data-bind="out-rec-time-2" value="업로드 시점" />
+
+					<h2 class="sidebar__label">추천 영상 3</h2>
+					<label class="field-label">썸네일 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-rec-thumb-3" />
+					<label class="field-label">제목</label>
+					<input class="sidebar__input" data-bind="out-rec-title-3" value="추천 영상 제목 3" />
+					<label class="field-label">채널명</label>
+					<input class="sidebar__input" data-bind="out-rec-channel-3" value="채널명" />
+					<label class="field-label">조회수</label>
+					<input class="sidebar__input" data-bind="out-rec-views-3" value="조회수" />
+					<label class="field-label">업로드 시점</label>
+					<input class="sidebar__input" data-bind="out-rec-time-3" value="업로드 시점" />
+
+					<h2 class="sidebar__label">추천 영상 4</h2>
+					<label class="field-label">썸네일 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-rec-thumb-4" />
+					<label class="field-label">제목</label>
+					<input class="sidebar__input" data-bind="out-rec-title-4" value="추천 영상 제목 4" />
+					<label class="field-label">채널명</label>
+					<input class="sidebar__input" data-bind="out-rec-channel-4" value="채널명" />
+					<label class="field-label">조회수</label>
+					<input class="sidebar__input" data-bind="out-rec-views-4" value="조회수" />
+					<label class="field-label">업로드 시점</label>
+					<input class="sidebar__input" data-bind="out-rec-time-4" value="업로드 시점" />
+
+					<h2 class="sidebar__label">추천 영상 5</h2>
+					<label class="field-label">썸네일 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-rec-thumb-5" />
+					<label class="field-label">제목</label>
+					<input class="sidebar__input" data-bind="out-rec-title-5" value="추천 영상 제목 5" />
+					<label class="field-label">채널명</label>
+					<input class="sidebar__input" data-bind="out-rec-channel-5" value="채널명" />
+					<label class="field-label">조회수</label>
+					<input class="sidebar__input" data-bind="out-rec-views-5" value="조회수" />
+					<label class="field-label">업로드 시점</label>
+					<input class="sidebar__input" data-bind="out-rec-time-5" value="업로드 시점" />
+
+					<h2 class="sidebar__label">추천 영상 6</h2>
+					<label class="field-label">썸네일 사진</label>
+					<input type="file" accept="image/*" class="sidebar__file" data-img-bind="img-rec-thumb-6" />
+					<label class="field-label">제목</label>
+					<input class="sidebar__input" data-bind="out-rec-title-6" value="추천 영상 제목 6" />
+					<label class="field-label">채널명</label>
+					<input class="sidebar__input" data-bind="out-rec-channel-6" value="채널명" />
+					<label class="field-label">조회수</label>
+					<input class="sidebar__input" data-bind="out-rec-views-6" value="조회수" />
+					<label class="field-label">업로드 시점</label>
+					<input class="sidebar__input" data-bind="out-rec-time-6" value="업로드 시점" />
+				</section>
+			</div>
+		</div>
+	</aside>
+
+	<div class="main-viewport">
+		<div class="main">
+			<!-- Header -->
+			<header class="header">
+				<div class="header-left">
+					<div class="icon-btn">
+						<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+							aria-hidden="true" style="
+                display: inherit;
+                width: 100%;
+                height: 100%;
+                fill: var(--text);
+              ">
+							<path
+								d="M20 5H4a1 1 0 000 2h16a1 1 0 100-2Zm0 6H4a1 1 0 000 2h16a1 1 0 000-2Zm0 6H4a1 1 0 000 2h16a1 1 0 000-2Z">
+							</path>
+						</svg>
+					</div>
+					<div class="logo">
+						<svg width="93" height="20" viewBox="0 0 93 20" focusable="false" xmlns="http://www.w3.org/2000/svg"
+							id="yt-ringo2-svg_yt6" aria-hidden="true" style="
+                pointer-events: none;
+                display: inherit;
+                width: 93px;
+                height: 20px;
+                user-select: auto !important;
+              ">
+							<g style="user-select: auto !important">
+								<path
+									d="M14.4848 20C14.4848 20 23.5695 20 25.8229 19.4C27.0917 19.06 28.0459 18.08 28.3808 16.87C29 14.65 29 9.98 29 9.98C29 9.98 29 5.34 28.3808 3.14C28.0459 1.9 27.0917 0.94 25.8229 0.61C23.5695 0 14.4848 0 14.4848 0C14.4848 0 5.42037 0 3.17711 0.61C1.9286 0.94 0.954148 1.9 0.59888 3.14C0 5.34 0 9.98 0 9.98C0 9.98 0 14.65 0.59888 16.87C0.954148 18.08 1.9286 19.06 3.17711 19.4C5.42037 20 14.4848 20 14.4848 20Z"
+									fill="#FF0033" style="
+                    user-select: auto !important;
+                  "></path>
+								<path d="M19 10L11.5 5.75V14.25L19 10Z" fill="white" style="
+                    user-select: auto !important;
+                  "></path>
+							</g>
+							<g id="youtube-paths_yt6" style="user-select: auto !important">
+								<path
+									d="M37.1384 18.8999V13.4399L40.6084 2.09994H38.0184L36.6984 7.24994C36.3984 8.42994 36.1284 9.65994 35.9284 10.7999H35.7684C35.6584 9.79994 35.3384 8.48994 35.0184 7.22994L33.7384 2.09994H31.1484L34.5684 13.4399V18.8999H37.1384Z"
+									style="
+                    user-select: auto !important;
+                  "></path>
+								<path
+									d="M44.1003 6.29994C41.0703 6.29994 40.0303 8.04994 40.0303 11.8199V13.6099C40.0303 16.9899 40.6803 19.1099 44.0403 19.1099C47.3503 19.1099 48.0603 17.0899 48.0603 13.6099V11.8199C48.0603 8.44994 47.3803 6.29994 44.1003 6.29994ZM45.3903 14.7199C45.3903 16.3599 45.1003 17.3899 44.0503 17.3899C43.0203 17.3899 42.7303 16.3499 42.7303 14.7199V10.6799C42.7303 9.27994 42.9303 8.02994 44.0503 8.02994C45.2303 8.02994 45.3903 9.34994 45.3903 10.6799V14.7199Z"
+									style="
+                    user-select: auto !important;
+                  "></path>
+								<path
+									d="M52.2713 19.0899C53.7313 19.0899 54.6413 18.4799 55.3913 17.3799H55.5013L55.6113 18.8999H57.6012V6.53994H54.9613V16.4699C54.6812 16.9599 54.0312 17.3199 53.4212 17.3199C52.6512 17.3199 52.4113 16.7099 52.4113 15.6899V6.53994H49.7812V15.8099C49.7812 17.8199 50.3613 19.0899 52.2713 19.0899Z"
+									style="
+                    user-select: auto !important;
+                  "></path>
+								<path d="M62.8261 18.8999V4.14994H65.8661V2.09994H57.1761V4.14994H60.2161V18.8999H62.8261Z" style="
+                    user-select: auto !important;
+                  "></path>
+								<path
+									d="M67.8728 19.0899C69.3328 19.0899 70.2428 18.4799 70.9928 17.3799H71.1028L71.2128 18.8999H73.2028V6.53994H70.5628V16.4699C70.2828 16.9599 69.6328 17.3199 69.0228 17.3199C68.2528 17.3199 68.0128 16.7099 68.0128 15.6899V6.53994H65.3828V15.8099C65.3828 17.8199 65.9628 19.0899 67.8728 19.0899Z"
+									style="
+                    user-select: auto !important;
+                  "></path>
+								<path
+									d="M80.6744 6.26994C79.3944 6.26994 78.4744 6.82994 77.8644 7.73994H77.7344C77.8144 6.53994 77.8744 5.51994 77.8744 4.70994V1.43994H75.3244L75.3144 12.1799L75.3244 18.8999H77.5444L77.7344 17.6999H77.8044C78.3944 18.5099 79.3044 19.0199 80.5144 19.0199C82.5244 19.0199 83.3844 17.2899 83.3844 13.6099V11.6999C83.3844 8.25994 82.9944 6.26994 80.6744 6.26994ZM80.7644 13.6099C80.7644 15.9099 80.4244 17.2799 79.3544 17.2799C78.8544 17.2799 78.1644 17.0399 77.8544 16.5899V9.23994C78.1244 8.53994 78.7244 8.02994 79.3944 8.02994C80.4744 8.02994 80.7644 9.33994 80.7644 11.7299V13.6099Z"
+									style="
+                    user-select: auto !important;
+                  "></path>
+								<path
+									d="M92.6517 11.4999C92.6517 8.51994 92.3517 6.30994 88.9217 6.30994C85.6917 6.30994 84.9717 8.45994 84.9717 11.6199V13.7899C84.9717 16.8699 85.6317 19.1099 88.8417 19.1099C91.3817 19.1099 92.6917 17.8399 92.5417 15.3799L90.2917 15.2599C90.2617 16.7799 89.9117 17.3999 88.9017 17.3999C87.6317 17.3999 87.5717 16.1899 87.5717 14.3899V13.5499H92.6517V11.4999ZM88.8617 7.96994C90.0817 7.96994 90.1717 9.11994 90.1717 11.0699V12.0799H87.5717V11.0699C87.5717 9.13994 87.6517 7.96994 88.8617 7.96994Z"
+									style="
+                    user-select: auto !important;
+                  "></path>
+							</g>
+						</svg>
+					</div>
+				</div>
+				<div class="header-center">
+					<div class="search-box">
+						<div class="placeholder">검색</div>
+					</div>
+					<div class="search-btn">
+						<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+							aria-hidden="true" style="
+                display: inherit;
+                width: 24px;
+                height: 24px;
+                fill: var(--text);
+              ">
+							<path
+								d="M11 2a9 9 0 105.641 16.01.966.966 0 00.152.197l3.5 3.5a1 1 0 101.414-1.414l-3.5-3.5a1 1 0 00-.197-.153A8.96 8.96 0 0020 11a9 9 0 00-9-9Zm0 2a7 7 0 110 14 7 7 0 010-14Z">
+							</path>
+						</svg>
+					</div>
+					<div class="mic-btn">
+						<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+							aria-hidden="true" style="
+                display: inherit;
+                width: 24px;
+                height: 24px;
+                fill: var(--text);
+              ">
+							<path
+								d="M18.063 14.5a1 1 0 111.73 1A8.998 8.998 0 0113 19.942V22a1 1 0 11-2 0v-2.058A8.999 8.999 0 014.206 15.5l.866-.5.865-.5a7.002 7.002 0 0012.125 0ZM12 1a5 5 0 015 5v5a5 5 0 01-10 0V6a5 5 0 015-5ZM4.572 14.134a1 1 0 011.365.366l-1.731 1a1 1 0 01.366-1.366ZM12 3a3 3 0 00-3 3v5a3 3 0 106 0V6a3 3 0 00-3-3Z">
+							</path>
+						</svg>
+					</div>
+				</div>
+				<div class="header-right">
+					<div class="create-btn">
+						<svg width="20" height="20" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+							aria-hidden="true" style="display: inherit; fill: var(--text)">
+							<path d="M12 3a1 1 0 00-1 1v7H4a1 1 0 000 2h7v7a1 1 0 002 0v-7h7a1 1 0 000-2h-7V4a1 1 0 00-1-1Z"></path>
+						</svg>
+						만들기
+					</div>
+					<div class="icon-btn">
+						<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+							aria-hidden="true" style="
+                display: inherit;
+                width: 100%;
+                height: 100%;
+                fill: var(--text);
+              ">
+							<path
+								d="M16 19a4 4 0 11-8 0H4.765C3.21 19 2.25 17.304 3.05 15.97l1.806-3.01A1 1 0 005 12.446V8a7 7 0 0114 0v4.446c0 .181.05.36.142.515l1.807 3.01c.8 1.333-.161 3.029-1.716 3.029H16ZM12 3a5 5 0 00-5 5v4.446a3 3 0 01-.428 1.543L4.765 17h14.468l-1.805-3.01A3 3 0 0117 12.445V8a5 5 0 00-5-5Zm-2 16a2 2 0 104 0h-4Z">
+							</path>
+						</svg>
+					</div>
+					<div class="avatar img-editable" id="out-my-avatar">
+						<div class="img-fill" id="img-my-avatar"></div>
+					</div>
+				</div>
+			</header>
+
+			<!-- Layout -->
+			<main class="layout">
+
+				<!-- Main-->
+				<main class="video-col">
+					<div class="player img-editable" id="out-player">
+						<div class="img-fill" id="img-player"></div>
+					</div>
+
+					<div class="video-title" id="out-video-title">영상 제목</div>
+
+					<div class="video-meta-row">
+						<div class="channel-block">
+							<div class="channel-avatar img-editable" id="out-channel-avatar">
+								<div class="img-fill" id="img-channel-avatar"></div>
+							</div>
+							<div class="chnnel-profile">
+								<div class="channel-name" id="out-channel-name">채널명</div>
+								<div class="channel-subs">구독자 <div id="out-sub-count" class="inline-field">NNN</div>명</div>
+							</div>
+							<div class="sub-btn">구독</div>
+						</div>
+						<div class="action-row">
+							<div class="pill split">
+								<div>
+									<svg width="20" height="20" viewBox="12 11 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+										aria-hidden="true" style="
+                      display: inline-block;
+                      vertical-align: middle;
+                      margin-right: 4px;
+                    ">
+										<g clip-path="url(#__lottie_element_566)">
+											<g transform="matrix(1,0,0,1,24,24)" opacity="1" style="display: block">
+												<path fill="var(--text)" fill-opacity="1"
+													d=" M-2.7780001163482666,-10.204999923706055 C-2.618000030517578,-10.663999557495117 -2.1500000953674316,-10.940999984741211 -1.6699999570846558,-10.862000465393066 C-1.6699999570846558,-10.862000465393066 -0.6299999952316284,-10.687999725341797 -0.6299999952316284,-10.687999725341797 C1.6200000047683716,-10.312000274658203 3.0999999046325684,-8.135000228881836 2.621999979019165,-5.90500020980835 C2.621999979019165,-5.90500020980835 2,-3 2,-3 C2,-3 6.060999870300293,-3 6.060999870300293,-3 C7.7779998779296875,-3 9.265000343322754,-1.8079999685287476 9.637999534606934,-0.13199999928474426 C9.868000030517578,0.9039999842643738 9.631999969482422,1.996000051498413 9,2.8489999771118164 C9,2.8489999771118164 9.020000457763672,2.937000036239624 9.020000457763672,2.937000036239624 C9.319000244140625,4.2210001945495605 8.932999610900879,5.567999839782715 8,6.5 C8,6.5 8,6.543000221252441 8,6.543000221252441 C8,6.543000221252441 7.991000175476074,6.769000053405762 7.991000175476074,6.769000053405762 C7.9730000495910645,6.994999885559082 7.927000045776367,7.2179999351501465 7.855000019073486,7.433000087738037 C7.855000019073486,7.433000087738037 7.749000072479248,7.715000152587891 7.749000072479248,7.715000152587891 C7.164000034332275,9.090999603271484 5.809000015258789,10 4.295000076293945,10 C4.295000076293945,10 0.6890000104904175,10 0.6890000104904175,10 C0.6890000104904175,10 0.2980000078678131,9.993000030517578 0.2980000078678131,9.993000030517578 C-1.5260000228881836,9.932999610900879 -3.312999963760376,9.458999633789062 -4.926000118255615,8.604999542236328 C-4.926000118255615,8.604999542236328 -5.269000053405762,8.416000366210938 -5.269000053405762,8.416000366210938 C-5.269000053405762,8.416000366210938 -5.538000106811523,8.26200008392334 -5.538000106811523,8.26200008392334 C-5.802999973297119,8.109999656677246 -6.098999977111816,8.020999908447266 -6.401000022888184,8.001999855041504 C-6.401000022888184,8.001999855041504 -6.531000137329102,7.998000144958496 -6.531000137329102,7.998000144958496 C-6.531000137329102,7.998000144958496 -8.5,7.998000144958496 -8.5,7.998000144958496 C-9.32800006866455,7.998000144958496 -10,7.326000213623047 -10,6.498000144958496 C-10,6.498000144958496 -10,0.5 -10,0.5 C-10,-0.328000009059906 -9.32800006866455,-1 -8.5,-1 C-8.5,-1 -6.710000038146973,-1 -6.710000038146973,-1 C-6.710000038146973,-1 -6.552999973297119,-1.0130000114440918 -6.552999973297119,-1.0130000114440918 C-6.244999885559082,-1.062000036239624 -5.9770002365112305,-1.2510000467300415 -5.828999996185303,-1.5260000228881836 C-5.828999996185303,-1.5260000228881836 -5.765999794006348,-1.6699999570846558 -5.765999794006348,-1.6699999570846558 C-5.765999794006348,-1.6699999570846558 -2.7780001163482666,-10.204999923706055 -2.7780001163482666,-10.204999923706055z M-3.878000020980835,-1.0089999437332153 C-4.298999786376953,0.1940000057220459 -5.434999942779541,1 -6.710000038146973,1 C-6.710000038146973,1 -8,1 -8,1 C-8,1 -8,5.998000144958496 -8,5.998000144958496 C-8,5.998000144958496 -6.531000137329102,5.998000144958496 -6.531000137329102,5.998000144958496 C-5.835000038146973,5.998000144958496 -5.151000022888184,6.179999828338623 -4.546000003814697,6.526000022888184 C-4.546000003814697,6.526000022888184 -4.275000095367432,6.679999828338623 -4.275000095367432,6.679999828338623 C-4.275000095367432,6.679999828338623 -3.990000009536743,6.8379998207092285 -3.990000009536743,6.8379998207092285 C-2.549999952316284,7.599999904632568 -0.9430000185966492,8 0.6890000104904175,8 C0.6890000104904175,8 4.295000076293945,8 4.295000076293945,8 C5.048999786376953,8 5.718999862670898,7.515999794006348 5.958000183105469,6.801000118255615 C5.958000183105469,6.801000118255615 5.988999843597412,6.673999786376953 5.988999843597412,6.673999786376953 C5.995999813079834,6.630000114440918 6,6.586999893188477 6,6.543000221252441 C6,6.543000221252441 6,5.671000003814697 6,5.671000003814697 C6,5.671000003814697 6.586999893188477,5.085000038146973 6.586999893188477,5.085000038146973 C6.974999904632568,4.697000026702881 7.164000034332275,4.1579999923706055 7.110000133514404,3.619999885559082 C7.110000133514404,3.619999885559082 7.072000026702881,3.3889999389648438 7.072000026702881,3.3889999389648438 C7.072000026702881,3.3889999389648438 7.052000045776367,3.302999973297119 7.052000045776367,3.302999973297119 C7.052000045776367,3.302999973297119 6.8429999351501465,2.4019999504089355 6.8429999351501465,2.4019999504089355 C6.8429999351501465,2.4019999504089355 7.392000198364258,1.659000039100647 7.392000198364258,1.659000039100647 C7.682000160217285,1.2680000066757202 7.788000106811523,0.7670000195503235 7.684999942779541,0.3019999861717224 C7.514999866485596,-0.45899999141693115 6.841000080108643,-1 6.060999870300293,-1 C6.060999870300293,-1 2,-1 2,-1 C1.3960000276565552,-1 0.8240000009536743,-1.2740000486373901 0.4440000057220459,-1.7430000305175781 C0.06499999761581421,-2.2130000591278076 -0.0820000022649765,-2.8289999961853027 0.04399999976158142,-3.4189999103546143 C0.04399999976158142,-3.4189999103546143 0.6669999957084656,-6.322999954223633 0.6669999957084656,-6.322999954223633 C0.906000018119812,-7.438000202178955 0.16599999368190765,-8.527000427246094 -0.9589999914169312,-8.71500015258789 C-0.9589999914169312,-8.71500015258789 -1.1690000295639038,-8.75 -1.1690000295639038,-8.75 C-1.1690000295639038,-8.75 -3.878000020980835,-1.0089999437332153 -3.878000020980835,-1.0089999437332153z">
+												</path>
+											</g>
+										</g>
+									</svg>
+									<div id="out-like-count" class="inline-field">NNN</div>
+								</div>
+								<div>
+									<svg width="20" height="20" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+										aria-hidden="true" style="
+                      display: inline-block;
+                      vertical-align: middle;
+                      fill: var(--text);
+                    ">
+										<path
+											d="m11.31 2 .392.007c1.824.06 3.61.534 5.223 1.388l.343.189.27.154c.264.152.56.24.863.26l.13.004H20.5a1.5 1.5 0 011.5 1.5V11.5a1.5 1.5 0 01-1.5 1.5h-1.79l-.158.013a1 1 0 00-.723.512l-.064.145-2.987 8.535a1 1 0 01-1.109.656l-1.04-.174a4 4 0 01-3.251-4.783L10 15H5.938a3.664 3.664 0 01-3.576-2.868A3.682 3.682 0 013 9.15l-.02-.088A3.816 3.816 0 014 5.5v-.043l.008-.227a2.86 2.86 0 01.136-.664l.107-.28A3.754 3.754 0 017.705 2h3.605ZM7.705 4c-.755 0-1.425.483-1.663 1.2l-.032.126a.818.818 0 00-.01.131v.872l-.587.586a1.816 1.816 0 00-.524 1.465l.038.23.02.087.21.9-.55.744a1.686 1.686 0 00-.321 1.18l.029.177c.17.76.844 1.302 1.623 1.302H10a2.002 2.002 0 011.956 2.419l-.623 2.904-.034.208a2.002 2.002 0 001.454 2.139l.206.045.21.035 2.708-7.741A3.001 3.001 0 0118.71 11H20V6.002h-1.47c-.696 0-1.38-.183-1.985-.528l-.27-.155-.285-.157A10.002 10.002 0 0011.31 4H7.705Z">
+										</path>
+									</svg>
+								</div>
+							</div>
+							<div class="pill">
+								<svg width="20" height="20" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+									aria-hidden="true" style="
+                    display: inline-block;
+                    vertical-align: middle;
+                    fill: var(--text);
+                  ">
+									<path
+										d="M10 3.158V7.51c-5.428.223-8.27 3.75-8.875 11.199-.04.487-.07.975-.09 1.464l-.014.395c-.014.473.578.684.88.32.302-.368.61-.73.925-1.086l.244-.273c1.79-1.967 3-2.677 4.93-2.917a18.011 18.011 0 012-.112v4.346a1 1 0 001.646.763l9.805-8.297 1.55-1.31-1.55-1.31-9.805-8.297A1 1 0 0010 3.158Zm2 6.27v.002-4.116l7.904 6.688L12 18.689v-4.212l-2.023.024c-1.935.022-3.587.17-5.197 1.024a9 9 0 00-1.348.893c.355-1.947.916-3.39 1.63-4.425 1.062-1.541 2.607-2.385 5.02-2.485L12 9.428Z">
+									</path>
+								</svg>
+								공유
+							</div>
+							<div class="pill">
+								<svg width="20" height="20" viewBox="0 -960 960 960" focusable="false"
+									xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="
+                    display: inline-block;
+                    vertical-align: middle;
+                    fill: var(--text);
+                  ">
+									<path
+										d="M480-80q0-83-31.5-156T363-363q-54-54-127-85.5T80-480q83 0 156-31.5T363-597q54-54 85.5-127T480-880q0 83 31.5 156T597-597q54 54 127 85.5T880-480q-83 0-156 31.5T597-363q-54 54-85.5 127T480-80Z">
+									</path>
+								</svg>
+								질문하기
+							</div>
+							<div class="pill">
+								<svg width="20" height="20" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+									aria-hidden="true" style="
+                    display: inline-block;
+                    vertical-align: middle;
+                    fill: var(--text);
+                  ">
+									<path
+										d="M19 2H5a2 2 0 00-2 2v16.887c0 1.266 1.382 2.048 2.469 1.399L12 18.366l6.531 3.919c1.087.652 2.469-.131 2.469-1.397V4a2 2 0 00-2-2ZM5 20.233V4h14v16.233l-6.485-3.89-.515-.309-.515.309L5 20.233Z">
+									</path>
+								</svg>
+								저장
+							</div>
+							<div class="pill" style="
+                  aspect-ratio: 1/1;
+                  width: 40px;
+                  height: 40px;
+                  padding: 0;
+                  justify-content: center;
+                ">
+								<svg width="20" height="20" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+									aria-hidden="true" style="
+                    display: inline-block;
+                    vertical-align: middle;
+                    fill: var(--text);
+                  ">
+									<path d="M6 10a2 2 0 100 4 2 2 0 000-4Zm6 0a2 2 0 100 4 2 2 0 000-4Zm6 0a2 2 0 100 4 2 2 0 000-4Z">
+									</path>
+								</svg>
+							</div>
+						</div>
+					</div>
+
+					<div class="desc-box">
+						<div class="meta-line">
+							<div class="views">조회수 <div id="out-views" class="inline-field">NNN</div>회</div>
+							<div class="upload-date" id="out-upload-date">업로드 날짜</div>
+							<div class="hashtag">
+								<div class="hashtags" id="out-hashtag-1">#해시태그1</div>
+								<div class="hashtags" id="out-hashtag-2">#해시태그2</div>
+								<div class="hashtags" id="out-hashtag-3">#해시태그3</div>
+							</div>
+						</div>
+						<div class="snippet-wrap">
+							<div class="line" id="out-snippet-lines">
+								가나다라<br>
+								마바사
+							</div>
+							<div class="line last-line-row">
+								<div class="last-line-text" id="out-snippet-last-line">마지막</div>
+								<div class="more-inline">…더보기</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Comments -->
+					<div class="comments-header">
+						<div class="coments-count">댓글 <div id="out-comment-count" class="inline-field">NNN</div>개</div>
+						<div class="sort-btn">
+							<svg width="20" height="20" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+								aria-hidden="true" style="display: inherit; fill: var(--text)">
+								<path
+									d="M21 5H3a1 1 0 000 2h18a1 1 0 100-2Zm-6 6H3a1 1 0 000 2h12a1 1 0 000-2Zm-6 6H3a1 1 0 000 2h6a1 1 0 000-2Z">
+								</path>
+							</svg>
+							정렬 기준
+						</div>
+					</div>
+
+					<div class="comment-input-row">
+						<div class="avatar img-editable" id="out-comment-input-avatar">
+							<div class="img-fill" id="img-comment-input-avatar"></div>
+						</div>
+						<div class="comment-input">댓글 추가…</div>
+					</div>
+
+					<div class="comment">
+						<div class="avatar-sm img-editable" id="out-comment-avatar">
+							<div class="img-fill" id="img-comment-avatar"></div>
+						</div>
+						<div class="comment-body">
+							<div class="comment-head">
+								<div class="comment-author" id="out-comment-author">@아이디</div>
+								<div class="comment-time" id="out-comment-time">작성 시간</div>
+							</div>
+							<div class="comment-text" id="out-comment-text">
+								댓글 본문 내용<br />
+								가나다라
+							</div>
+							<div class="comment-actions">
+								<div class="thumbs-up">
+									<svg width="14" height="14" viewBox="12 11 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+										aria-hidden="true" style="
+                      display: inline-block;
+                      vertical-align: middle;
+                      margin-right: 4px;
+                    ">
+										<g transform="matrix(1,0,0,1,24,24)">
+											<path fill="rgb(15, 15, 15)" fill-opacity="1"
+												d=" M-2.7780001163482666,-10.204999923706055 C-2.618000030517578,-10.663999557495117 -2.1500000953674316,-10.940999984741211 -1.6699999570846558,-10.862000465393066 C-1.6699999570846558,-10.862000465393066 -0.6299999952316284,-10.687999725341797 -0.6299999952316284,-10.687999725341797 C1.6200000047683716,-10.312000274658203 3.0999999046325684,-8.135000228881836 2.621999979019165,-5.90500020980835 C2.621999979019165,-5.90500020980835 2,-3 2,-3 C2,-3 6.060999870300293,-3 6.060999870300293,-3 C7.7779998779296875,-3 9.265000343322754,-1.8079999685287476 9.637999534606934,-0.13199999928474426 C9.868000030517578,0.9039999842643738 9.631999969482422,1.996000051498413 9,2.8489999771118164 C9,2.8489999771118164 9.020000457763672,2.937000036239624 9.020000457763672,2.937000036239624 C9.319000244140625,4.2210001945495605 8.932999610900879,5.567999839782715 8,6.5 C8,6.5 8,6.543000221252441 8,6.543000221252441 C8,6.543000221252441 7.991000175476074,6.769000053405762 7.991000175476074,6.769000053405762 C7.9730000495910645,6.994999885559082 7.927000045776367,7.2179999351501465 7.855000019073486,7.433000087738037 C7.855000019073486,7.433000087738037 7.749000072479248,7.715000152587891 7.749000072479248,7.715000152587891 C7.164000034332275,9.090999603271484 5.809000015258789,10 4.295000076293945,10 C4.295000076293945,10 0.6890000104904175,10 0.6890000104904175,10 C0.6890000104904175,10 0.2980000078678131,9.993000030517578 0.2980000078678131,9.993000030517578 C-1.5260000228881836,9.932999610900879 -3.312999963760376,9.458999633789062 -4.926000118255615,8.604999542236328 C-4.926000118255615,8.604999542236328 -5.269000053405762,8.416000366210938 -5.269000053405762,8.416000366210938 C-5.269000053405762,8.416000366210938 -5.538000106811523,8.26200008392334 -5.538000106811523,8.26200008392334 C-5.802999973297119,8.109999656677246 -6.098999977111816,8.020999908447266 -6.401000022888184,8.001999855041504 C-6.401000022888184,8.001999855041504 -6.531000137329102,7.998000144958496 -6.531000137329102,7.998000144958496 C-6.531000137329102,7.998000144958496 -8.5,7.998000144958496 -8.5,7.998000144958496 C-9.32800006866455,7.998000144958496 -10,7.326000213623047 -10,6.498000144958496 C-10,6.498000144958496 -10,0.5 -10,0.5 C-10,-0.328000009059906 -9.32800006866455,-1 -8.5,-1 C-8.5,-1 -6.710000038146973,-1 -6.710000038146973,-1 C-6.710000038146973,-1 -6.552999973297119,-1.0130000114440918 -6.552999973297119,-1.0130000114440918 C-6.244999885559082,-1.062000036239624 -5.9770002365112305,-1.2510000467300415 -5.828999996185303,-1.5260000228881836 C-5.828999996185303,-1.5260000228881836 -5.765999794006348,-1.6699999570846558 -5.765999794006348,-1.6699999570846558 C-5.765999794006348,-1.6699999570846558 -2.7780001163482666,-10.204999923706055 -2.7780001163482666,-10.204999923706055z M-3.878000020980835,-1.0089999437332153 C-4.298999786376953,0.1940000057220459 -5.434999942779541,1 -6.710000038146973,1 C-6.710000038146973,1 -8,1 -8,1 C-8,1 -8,5.998000144958496 -8,5.998000144958496 C-8,5.998000144958496 -6.531000137329102,5.998000144958496 -6.531000137329102,5.998000144958496 C-5.835000038146973,5.998000144958496 -5.151000022888184,6.179999828338623 -4.546000003814697,6.526000022888184 C-4.546000003814697,6.526000022888184 -4.275000095367432,6.679999828338623 -4.275000095367432,6.679999828338623 C-4.275000095367432,6.679999828338623 -3.990000009536743,6.8379998207092285 -3.990000009536743,6.8379998207092285 C-2.549999952316284,7.599999904632568 -0.9430000185966492,8 0.6890000104904175,8 C0.6890000104904175,8 4.295000076293945,8 4.295000076293945,8 C5.048999786376953,8 5.718999862670898,7.515999794006348 5.958000183105469,6.801000118255615 C5.958000183105469,6.801000118255615 5.988999843597412,6.673999786376953 5.988999843597412,6.673999786376953 C5.995999813079834,6.630000114440918 6,6.586999893188477 6,6.543000221252441 C6,6.543000221252441 6,5.671000003814697 6,5.671000003814697 C6,5.671000003814697 6.586999893188477,5.085000038146973 6.586999893188477,5.085000038146973 C6.974999904632568,4.697000026702881 7.164000034332275,4.1579999923706055 7.110000133514404,3.619999885559082 C7.110000133514404,3.619999885559082 7.072000026702881,3.3889999389648438 7.072000026702881,3.3889999389648438 C7.072000026702881,3.3889999389648438 7.052000045776367,3.302999973297119 7.052000045776367,3.302999973297119 C7.052000045776367,3.302999973297119 6.8429999351501465,2.4019999504089355 6.8429999351501465,2.4019999504089355 C6.8429999351501465,2.4019999504089355 7.392000198364258,1.659000039100647 7.392000198364258,1.659000039100647 C7.682000160217285,1.2680000066757202 7.788000106811523,0.7670000195503235 7.684999942779541,0.3019999861717224 C7.514999866485596,-0.45899999141693115 6.841000080108643,-1 6.060999870300293,-1 C6.060999870300293,-1 2,-1 2,-1 C1.3960000276565552,-1 0.8240000009536743,-1.2740000486373901 0.4440000057220459,-1.7430000305175781 C0.06499999761581421,-2.2130000591278076 -0.0820000022649765,-2.8289999961853027 0.04399999976158142,-3.4189999103546143 C0.04399999976158142,-3.4189999103546143 0.6669999957084656,-6.322999954223633 0.6669999957084656,-6.322999954223633 C0.906000018119812,-7.438000202178955 0.16599999368190765,-8.527000427246094 -0.9589999914169312,-8.71500015258789 C-0.9589999914169312,-8.71500015258789 -1.1690000295639038,-8.75 -1.1690000295639038,-8.75 C-1.1690000295639038,-8.75 -3.878000020980835,-1.0089999437332153 -3.878000020980835,-1.0089999437332153z">
+											</path>
+										</g>
+									</svg>
+									<div class="thumbs-up-count">NNN</div>
+								</div>
+								<div>
+									<svg width="14" height="14" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+										aria-hidden="true" style="
+                      display: inline-block;
+                      vertical-align: middle;
+                      fill: rgb(15, 15, 15);
+                    ">
+										<path
+											d="m11.31 2 .392.007c1.824.06 3.61.534 5.223 1.388l.343.189.27.154c.264.152.56.24.863.26l.13.004H20.5a1.5 1.5 0 011.5 1.5V11.5a1.5 1.5 0 01-1.5 1.5h-1.79l-.158.013a1 1 0 00-.723.512l-.064.145-2.987 8.535a1 1 0 01-1.109.656l-1.04-.174a4 4 0 01-3.251-4.783L10 15H5.938a3.664 3.664 0 01-3.576-2.868A3.682 3.682 0 013 9.15l-.02-.088A3.816 3.816 0 014 5.5v-.043l.008-.227a2.86 2.86 0 01.136-.664l.107-.28A3.754 3.754 0 017.705 2h3.605ZM7.705 4c-.755 0-1.425.483-1.663 1.2l-.032.126a.818.818 0 00-.01.131v.872l-.587.586a1.816 1.816 0 00-.524 1.465l.038.23.02.087.21.9-.55.744a1.686 1.686 0 00-.321 1.18l.029.177c.17.76.844 1.302 1.623 1.302H10a2.002 2.002 0 011.956 2.419l-.623 2.904-.034.208a2.002 2.002 0 001.454 2.139l.206.045.21.035 2.708-7.741A3.001 3.001 0 0118.71 11H20V6.002h-1.47c-.696 0-1.38-.183-1.985-.528l-.27-.155-.285-.157A10.002 10.002 0 0011.31 4H7.705Z">
+										</path>
+									</svg>
+								</div>
+								<div class="replyBtn">답글</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="comment reply">
+						<div class="avatar-sm img-editable" id="out-reply-avatar">
+							<div class="img-fill" id="img-reply-avatar"></div>
+						</div>
+						<div class="comment-body">
+							<div class="comment-head">
+								<div class="comment-author" id="out-reply-author">@아이디</div>
+								<div class="comment-time" id="out-reply-time">작성 시간</div>
+							</div>
+							<div class="comment-text" id="out-reply-text">
+								대댓글 본문 내용
+							</div>
+							<div class="comment-actions">
+								<div class="thumbs-up">
+									<svg width="14" height="14" viewBox="12 11 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+										aria-hidden="true" style="
+                      display: inline-block;
+                      vertical-align: middle;
+                      margin-right: 4px;
+                    ">
+										<g transform="matrix(1,0,0,1,24,24)">
+											<path fill="rgb(15, 15, 15)" fill-opacity="1"
+												d=" M-2.7780001163482666,-10.204999923706055 C-2.618000030517578,-10.663999557495117 -2.1500000953674316,-10.940999984741211 -1.6699999570846558,-10.862000465393066 C-1.6699999570846558,-10.862000465393066 -0.6299999952316284,-10.687999725341797 -0.6299999952316284,-10.687999725341797 C1.6200000047683716,-10.312000274658203 3.0999999046325684,-8.135000228881836 2.621999979019165,-5.90500020980835 C2.621999979019165,-5.90500020980835 2,-3 2,-3 C2,-3 6.060999870300293,-3 6.060999870300293,-3 C7.7779998779296875,-3 9.265000343322754,-1.8079999685287476 9.637999534606934,-0.13199999928474426 C9.868000030517578,0.9039999842643738 9.631999969482422,1.996000051498413 9,2.8489999771118164 C9,2.8489999771118164 9.020000457763672,2.937000036239624 9.020000457763672,2.937000036239624 C9.319000244140625,4.2210001945495605 8.932999610900879,5.567999839782715 8,6.5 C8,6.5 8,6.543000221252441 8,6.543000221252441 C8,6.543000221252441 7.991000175476074,6.769000053405762 7.991000175476074,6.769000053405762 C7.9730000495910645,6.994999885559082 7.927000045776367,7.2179999351501465 7.855000019073486,7.433000087738037 C7.855000019073486,7.433000087738037 7.749000072479248,7.715000152587891 7.749000072479248,7.715000152587891 C7.164000034332275,9.090999603271484 5.809000015258789,10 4.295000076293945,10 C4.295000076293945,10 0.6890000104904175,10 0.6890000104904175,10 C0.6890000104904175,10 0.2980000078678131,9.993000030517578 0.2980000078678131,9.993000030517578 C-1.5260000228881836,9.932999610900879 -3.312999963760376,9.458999633789062 -4.926000118255615,8.604999542236328 C-4.926000118255615,8.604999542236328 -5.269000053405762,8.416000366210938 -5.269000053405762,8.416000366210938 C-5.269000053405762,8.416000366210938 -5.538000106811523,8.26200008392334 -5.538000106811523,8.26200008392334 C-5.802999973297119,8.109999656677246 -6.098999977111816,8.020999908447266 -6.401000022888184,8.001999855041504 C-6.401000022888184,8.001999855041504 -6.531000137329102,7.998000144958496 -6.531000137329102,7.998000144958496 C-6.531000137329102,7.998000144958496 -8.5,7.998000144958496 -8.5,7.998000144958496 C-9.32800006866455,7.998000144958496 -10,7.326000213623047 -10,6.498000144958496 C-10,6.498000144958496 -10,0.5 -10,0.5 C-10,-0.328000009059906 -9.32800006866455,-1 -8.5,-1 C-8.5,-1 -6.710000038146973,-1 -6.710000038146973,-1 C-6.710000038146973,-1 -6.552999973297119,-1.0130000114440918 -6.552999973297119,-1.0130000114440918 C-6.244999885559082,-1.062000036239624 -5.9770002365112305,-1.2510000467300415 -5.828999996185303,-1.5260000228881836 C-5.828999996185303,-1.5260000228881836 -5.765999794006348,-1.6699999570846558 -5.765999794006348,-1.6699999570846558 C-5.765999794006348,-1.6699999570846558 -2.7780001163482666,-10.204999923706055 -2.7780001163482666,-10.204999923706055z M-3.878000020980835,-1.0089999437332153 C-4.298999786376953,0.1940000057220459 -5.434999942779541,1 -6.710000038146973,1 C-6.710000038146973,1 -8,1 -8,1 C-8,1 -8,5.998000144958496 -8,5.998000144958496 C-8,5.998000144958496 -6.531000137329102,5.998000144958496 -6.531000137329102,5.998000144958496 C-5.835000038146973,5.998000144958496 -5.151000022888184,6.179999828338623 -4.546000003814697,6.526000022888184 C-4.546000003814697,6.526000022888184 -4.275000095367432,6.679999828338623 -4.275000095367432,6.679999828338623 C-4.275000095367432,6.679999828338623 -3.990000009536743,6.8379998207092285 -3.990000009536743,6.8379998207092285 C-2.549999952316284,7.599999904632568 -0.9430000185966492,8 0.6890000104904175,8 C0.6890000104904175,8 4.295000076293945,8 4.295000076293945,8 C5.048999786376953,8 5.718999862670898,7.515999794006348 5.958000183105469,6.801000118255615 C5.958000183105469,6.801000118255615 5.988999843597412,6.673999786376953 5.988999843597412,6.673999786376953 C5.995999813079834,6.630000114440918 6,6.586999893188477 6,6.543000221252441 C6,6.543000221252441 6,5.671000003814697 6,5.671000003814697 C6,5.671000003814697 6.586999893188477,5.085000038146973 6.586999893188477,5.085000038146973 C6.974999904632568,4.697000026702881 7.164000034332275,4.1579999923706055 7.110000133514404,3.619999885559082 C7.110000133514404,3.619999885559082 7.072000026702881,3.3889999389648438 7.072000026702881,3.3889999389648438 C7.072000026702881,3.3889999389648438 7.052000045776367,3.302999973297119 7.052000045776367,3.302999973297119 C7.052000045776367,3.302999973297119 6.8429999351501465,2.4019999504089355 6.8429999351501465,2.4019999504089355 C6.8429999351501465,2.4019999504089355 7.392000198364258,1.659000039100647 7.392000198364258,1.659000039100647 C7.682000160217285,1.2680000066757202 7.788000106811523,0.7670000195503235 7.684999942779541,0.3019999861717224 C7.514999866485596,-0.45899999141693115 6.841000080108643,-1 6.060999870300293,-1 C6.060999870300293,-1 2,-1 2,-1 C1.3960000276565552,-1 0.8240000009536743,-1.2740000486373901 0.4440000057220459,-1.7430000305175781 C0.06499999761581421,-2.2130000591278076 -0.0820000022649765,-2.8289999961853027 0.04399999976158142,-3.4189999103546143 C0.04399999976158142,-3.4189999103546143 0.6669999957084656,-6.322999954223633 0.6669999957084656,-6.322999954223633 C0.906000018119812,-7.438000202178955 0.16599999368190765,-8.527000427246094 -0.9589999914169312,-8.71500015258789 C-0.9589999914169312,-8.71500015258789 -1.1690000295639038,-8.75 -1.1690000295639038,-8.75 C-1.1690000295639038,-8.75 -3.878000020980835,-1.0089999437332153 -3.878000020980835,-1.0089999437332153z">
+											</path>
+										</g>
+									</svg>
+									<div class="thumbs-up-count">NNN</div>
+								</div>
+								<div class="creator-heart" title="채널 소유자가 하트를 남겼습니다">
+									<div class="heart-avatar img-editable" id="out-heart-avatar">
+										<div class="img-fill" id="img-heart-avatar"></div>
+									</div>
+									<div class="heart-badge">
+										<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+											aria-hidden="true" style="
+                        pointer-events: none;
+                        display: inherit;
+                        width: 100%;
+                        height: 100%;
+                      ">
+											<path fill="#fff" fill-rule="evenodd"
+												d="M16.25 2.5A6.56 6.56 0 0012 4.062 6.56 6.56 0 007.75 2.5C3.927 2.5 1 5.732 1 9.5c0 4.436 2.807 7.696 5.225 9.698a23.597 23.597 0 004.837 3.072l.095.044.029.013.01.004.005.003c.269-.61.535-1.222.799-1.834.797 1.834.799 1.834.799 1.834l.001-.001.003-.002.01-.004.03-.013.095-.044c.08-.037.19-.089.33-.157a23.6 23.6 0 004.507-2.915C20.193 17.196 23 13.936 23 9.5c0-3.768-2.927-7-6.75-7Zm0 2c2.623 0 4.75 2.239 4.75 5 0 7.089-9 11-9 11s-9-3.911-9-11c0-2.761 2.127-5 4.75-5a4.58 4.58 0 012.922 1.058A5 5 0 0112 7.265a5 5 0 011.328-1.707A4.58 4.58 0 0116.25 4.5Zm-3.453 17.834L12 20.5l-.797 1.834.797.347.797-.347Z">
+											</path>
+											<path fill="rgb(255, 0, 51)"
+												d="M16.25 3.5c-1.697 0-3.206.765-4.25 1.96C10.956 4.265 9.447 3.5 7.75 3.5 4.527 3.5 2 6.235 2 9.5c0 3.99 2.53 6.996 4.862 8.929 2.355 1.95 4.703 2.972 4.74 2.988l.398.174.398-.174c.037-.016 2.385-1.038 4.74-2.988C19.471 16.495 22 13.49 22 9.5c0-3.265-2.527-6-5.75-6Z">
+											</path>
+										</svg>
+									</div>
+								</div>
+								<div>
+									<svg width="14" height="14" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+										aria-hidden="true" style="
+                      display: inline-block;
+                      vertical-align: middle;
+                      fill: rgb(15, 15, 15);
+                    ">
+										<path
+											d="m11.31 2 .392.007c1.824.06 3.61.534 5.223 1.388l.343.189.27.154c.264.152.56.24.863.26l.13.004H20.5a1.5 1.5 0 011.5 1.5V11.5a1.5 1.5 0 01-1.5 1.5h-1.79l-.158.013a1 1 0 00-.723.512l-.064.145-2.987 8.535a1 1 0 01-1.109.656l-1.04-.174a4 4 0 01-3.251-4.783L10 15H5.938a3.664 3.664 0 01-3.576-2.868A3.682 3.682 0 013 9.15l-.02-.088A3.816 3.816 0 014 5.5v-.043l.008-.227a2.86 2.86 0 01.136-.664l.107-.28A3.754 3.754 0 017.705 2h3.605ZM7.705 4c-.755 0-1.425.483-1.663 1.2l-.032.126a.818.818 0 00-.01.131v.872l-.587.586a1.816 1.816 0 00-.524 1.465l.038.23.02.087.21.9-.55.744a1.686 1.686 0 00-.321 1.18l.029.177c.17.76.844 1.302 1.623 1.302H10a2.002 2.002 0 011.956 2.419l-.623 2.904-.034.208a2.002 2.002 0 001.454 2.139l.206.045.21.035 2.708-7.741A3.001 3.001 0 0118.71 11H20V6.002h-1.47c-.696 0-1.38-.183-1.985-.528l-.27-.155-.285-.157A10.002 10.002 0 0011.31 4H7.705Z">
+										</path>
+									</svg>
+								</div>
+								<div class="replyBtn">답글</div>
+							</div>
+						</div>
+					</div>
+				</main>
+
+				<!-- Sidebar -->
+				<sidebar class="side-col">
+					<div class="playlist-box">
+						<!-- Header -->
+						<div class="playlist-header">
+							<div class="playlist-header-titles">
+								<div>
+									<div class="playlist-title" id="out-playlist-title">
+										재생목록 제목
+									</div>
+									<div class="playlist-sub">
+										<div>
+											<div id="out-playlist-channel" class="inline-field">채널명</div> -
+										</div>
+										<div id="out-playlist-current">현재 순번</div>
+										<div>/</div>
+										<div id="out-playlist-total">전체 개수</div>
+									</div>
+								</div>
+								<div class="playlist-close">
+									<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+										aria-hidden="true">
+										<path
+											d="M17.293 5.293 12 10.586 6.707 5.293a1 1 0 10-1.414 1.414L10.586 12l-5.293 5.293a1 1 0 001.414 1.414L12 13.414l5.293 5.293a1 1 0 001.414-1.414L13.414 12l5.293-5.293a1 1 0 10-1.414-1.414Z">
+										</path>
+									</svg>
+								</div>
+							</div>
+							<!-- control panel -->
+							<div class="playlist-menu">
+								<div class="left">
+									<div class="icon">
+										<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+											aria-hidden="true" style="
+                        display: inherit;
+                        fill: var(--text);
+                      ">
+											<path
+												d="M17.293 1.293a1 1 0 000 1.415L18.586 4H7a5 5 0 00-5 5v4a1 1 0 102 0V9a3 3 0 013-3h11.586l-1.293 1.293a1 1 0 001.414 1.415L22.414 5l-3.707-3.707a1 1 0 00-1.414 0ZM21 10a1 1 0 00-1 1v4a3 3 0 01-3 3H5.414l1.293-1.292a1.001 1.001 0 00-1.414-1.415L1.586 19l3.707 3.707a1 1 0 101.414-1.413L5.414 20H17a5 5 0 005-5v-4a1 1 0 00-1-1Z">
+											</path>
+										</svg>
+									</div>
+									<div class="icon">
+										<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+											aria-hidden="true" style="
+                        display: inherit;
+                        fill: var(--text);
+                      ">
+											<path
+												d="M16.293 1.293a1 1 0 00-.001 1.415L18.585 5H17.21a7 7 0 00-5.823 3.118L6.95 14.774A5 5 0 012.79 17H2a1 1 0 000 2h.79a7 7 0 005.822-3.117l4.438-6.656A5 5 0 0117.21 7h1.376l-2.293 2.293a1 1 0 001.414 1.414L22.414 6l-4.707-4.707a1 1 0 00-1.414 0ZM2.789 5H2a1 1 0 000 2h.79a5 5 0 014.159 2.227l.647.97 1.202-1.802-.185-.277A7 7 0 002.789 5Zm13.504 8.293a1 1 0 00-.001 1.414L18.585 17H17.21a5 5 0 01-4.16-2.226l-.648-.972-1.202 1.803.186.278A7 7 0 0017.21 19h1.376l-2.293 2.294-.068.076a1 1 0 001.406 1.406l.076-.07L22.414 18l-4.707-4.707a1 1 0 00-1.414 0Z">
+											</path>
+										</svg>
+									</div>
+								</div>
+								<div class="right">
+									<div class="icon">
+										<svg width="20" height="20" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+											aria-hidden="true" style="
+                        display: inherit;
+                        fill: var(--text);
+                      ">
+											<path
+												d="M12 4a2 2 0 100 4 2 2 0 000-4Zm0 6a2 2 0 100 4 2 2 0 000-4Zm0 6a2 2 0 100 4 2 2 0 000-4Z">
+											</path>
+										</svg>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="playlist-items">
+							<div class="playlist-item active">
+								<div class="playlist-index">
+									<svg height="12" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+										aria-hidden="true" style="
+                      pointer-events: none;
+                      display: inherit;
+                      height: 12px;
+                      width: auto;
+                      fill: rgb(96, 96, 96);
+                    ">
+										<path d="M5 4.623V19.38a1.5 1.5 0 002.26 1.29L22 12 7.26 3.33A1.5 1.5 0 005 4.623Z"></path>
+									</svg>
+								</div>
+								<div class="playlist-thumb img-editable" id="out-playlist-thumb-1">
+									<div class="img-fill" id="img-playlist-thumb-1"></div>
+								</div>
+								<div class="playlist-info">
+									<div class="playlist-item-title" id="out-playlist-item-title-1">
+										현재 재생 중인 영상 제목
+									</div>
+									<div class="playlist-item-channel" id="out-playlist-item-channel-1">
+										업로더명
+									</div>
+								</div>
+							</div>
+							<div class="playlist-item">
+								<div class="playlist-index">2</div>
+								<div class="playlist-thumb img-editable" id="out-playlist-thumb-2">
+									<div class="img-fill" id="img-playlist-thumb-2"></div>
+								</div>
+								<div class="playlist-info">
+									<div class="playlist-item-title" id="out-playlist-item-title-2">
+										재생목록 영상 제목 2
+									</div>
+									<div class="playlist-item-channel" id="out-playlist-item-channel-2">
+										업로더명
+									</div>
+								</div>
+							</div>
+							<div class="playlist-item">
+								<div class="playlist-index">3</div>
+								<div class="playlist-thumb img-editable" id="out-playlist-thumb-3">
+									<div class="img-fill" id="img-playlist-thumb-3"></div>
+								</div>
+								<div class="playlist-info">
+									<div class="playlist-item-title" id="out-playlist-item-title-3">
+										재생목록 영상 제목 3
+									</div>
+									<div class="playlist-item-channel" id="out-playlist-item-channel-3">
+										업로더명
+									</div>
+								</div>
+							</div>
+							<div class="playlist-item">
+								<div class="playlist-index">4</div>
+								<div class="playlist-thumb img-editable" id="out-playlist-thumb-4">
+									<div class="img-fill" id="img-playlist-thumb-4"></div>
+								</div>
+								<div class="playlist-info">
+									<div class="playlist-item-title" id="out-playlist-item-title-4">
+										재생목록 영상 제목 4
+									</div>
+									<div class="playlist-item-channel" id="out-playlist-item-channel-4">
+										업로더명
+									</div>
+								</div>
+							</div>
+							<div class="playlist-item">
+								<div class="playlist-index">5</div>
+								<div class="playlist-thumb img-editable" id="out-playlist-thumb-5">
+									<div class="img-fill" id="img-playlist-thumb-5"></div>
+								</div>
+								<div class="playlist-info">
+									<div class="playlist-item-title" id="out-playlist-item-title-5">
+										재생목록 영상 제목 5
+									</div>
+									<div class="playlist-item-channel" id="out-playlist-item-channel-5">
+										업로더명
+									</div>
+								</div>
+							</div>
+							<div class="playlist-item">
+								<div class="playlist-index">6</div>
+								<div class="playlist-thumb img-editable" id="out-playlist-thumb-6">
+									<div class="img-fill" id="img-playlist-thumb-6"></div>
+								</div>
+								<div class="playlist-info">
+									<div class="playlist-item-title" id="out-playlist-item-title-6">
+										재생목록 영상 제목 6
+									</div>
+									<div class="playlist-item-channel" id="out-playlist-item-channel-6">
+										업로더명
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="chip-row">
+						<div class="chip-scroll">
+							<div class="chip active">전체</div>
+							<div class="chip">시리즈</div>
+							<div class="chip">채널명 제공</div>
+							<div class="chip">관련 콘텐츠</div>
+							<div class="chip">추천</div>
+							<div class="chip">최근에 업로드된 동영상</div>
+						</div>
+						<div class="chip-next">
+							<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+								aria-hidden="true" style="
+                  pointer-events: none;
+                  display: inherit;
+                  width: 24px;
+                  height: 24px;
+                  fill: var(--text);
+                ">
+								<path
+									d="M8.793 5.293a1 1 0 000 1.414L14.086 12l-5.293 5.293a1 1 0 101.414 1.414L16.914 12l-6.707-6.707a1 1 0 00-1.414 0Z">
+								</path>
+							</svg>
+						</div>
+					</div>
+
+					<div class="rec">
+						<div class="rec-item">
+							<div class="rec-thumb img-editable" id="out-rec-thumb-1">
+								<div class="img-fill" id="img-rec-thumb-1"></div>
+							</div>
+							<div class="rec-info">
+								<div class="rec-title" id="out-rec-title-1">
+									추천 영상 제목 1
+								</div>
+								<div class="rec-channel" id="out-rec-channel-1">채널명</div>
+								<div class="rec-meta">
+									<div class="meta-icon">
+										<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+											aria-hidden="true" style="
+                        pointer-events: none;
+                        display: inherit;
+                        width: 100%;
+                        height: 100%;
+                      ">
+											<path
+												d="M5 4.623v14.755a1.5 1.5 0 002.261 1.294l12.766-7.51L22 12.002l-1.973-1.162L7.26 3.33A1.5 1.5 0 005 4.623Zm2 13.88V5.497L18.056 12 7 18.503Z">
+											</path>
+										</svg>
+									</div>
+									<div id="out-rec-views-1" class="inline-field">조회수</div> · <div id="out-rec-time-1"
+										class="inline-field">업로드 시점</div>
+								</div>
+								<div class="rec-badge">새 동영상</div>
+							</div>
+						</div>
+						<div class="rec-item">
+							<div class="rec-thumb img-editable" id="out-rec-thumb-2">
+								<div class="img-fill" id="img-rec-thumb-2"></div>
+							</div>
+							<div class="rec-info">
+								<div class="rec-title" id="out-rec-title-2">
+									추천 영상 제목 2
+								</div>
+								<div class="rec-channel" id="out-rec-channel-2">채널명</div>
+								<div class="rec-meta">
+									<div class="meta-icon">
+										<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+											aria-hidden="true" style="
+                        pointer-events: none;
+                        display: inherit;
+                        width: 100%;
+                        height: 100%;
+                      ">
+											<path
+												d="M5 4.623v14.755a1.5 1.5 0 002.261 1.294l12.766-7.51L22 12.002l-1.973-1.162L7.26 3.33A1.5 1.5 0 005 4.623Zm2 13.88V5.497L18.056 12 7 18.503Z">
+											</path>
+										</svg>
+									</div>
+									<div id="out-rec-views-2" class="inline-field">조회수</div> · <div id="out-rec-time-2"
+										class="inline-field">업로드 시점</div>
+								</div>
+							</div>
+						</div>
+						<div class="rec-item">
+							<div class="rec-thumb img-editable" id="out-rec-thumb-3">
+								<div class="img-fill" id="img-rec-thumb-3"></div>
+							</div>
+							<div class="rec-info">
+								<div class="rec-title" id="out-rec-title-3">
+									추천 영상 제목 3
+								</div>
+								<div class="rec-channel" id="out-rec-channel-3">채널명</div>
+								<div class="rec-meta">
+									<div class="meta-icon">
+										<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+											aria-hidden="true" style="
+                        pointer-events: none;
+                        display: inherit;
+                        width: 100%;
+                        height: 100%;
+                      ">
+											<path
+												d="M5 4.623v14.755a1.5 1.5 0 002.261 1.294l12.766-7.51L22 12.002l-1.973-1.162L7.26 3.33A1.5 1.5 0 005 4.623Zm2 13.88V5.497L18.056 12 7 18.503Z">
+											</path>
+										</svg>
+									</div>
+									<div id="out-rec-views-3" class="inline-field">조회수</div> · <div id="out-rec-time-3"
+										class="inline-field">업로드 시점</div>
+								</div>
+								<div class="rec-badge">자동 더빙</div>
+							</div>
+						</div>
+						<div class="rec-item">
+							<div class="rec-thumb img-editable" id="out-rec-thumb-4">
+								<div class="img-fill" id="img-rec-thumb-4"></div>
+							</div>
+							<div class="rec-info">
+								<div class="rec-title" id="out-rec-title-4">
+									추천 영상 제목 4
+								</div>
+								<div class="rec-channel" id="out-rec-channel-4">채널명</div>
+								<div class="rec-meta">
+									<div class="meta-icon">
+										<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+											aria-hidden="true" style="
+                        pointer-events: none;
+                        display: inherit;
+                        width: 100%;
+                        height: 100%;
+                      ">
+											<path
+												d="M5 4.623v14.755a1.5 1.5 0 002.261 1.294l12.766-7.51L22 12.002l-1.973-1.162L7.26 3.33A1.5 1.5 0 005 4.623Zm2 13.88V5.497L18.056 12 7 18.503Z">
+											</path>
+										</svg>
+									</div>
+									<div id="out-rec-views-4" class="inline-field">조회수</div> · <div id="out-rec-time-4"
+										class="inline-field">업로드 시점</div>
+								</div>
+								<div class="rec-badge">새 동영상</div>
+							</div>
+						</div>
+						<div class="rec-item">
+							<div class="rec-thumb img-editable" id="out-rec-thumb-5">
+								<div class="img-fill" id="img-rec-thumb-5"></div>
+							</div>
+							<div class="rec-info">
+								<div class="rec-title" id="out-rec-title-5">
+									추천 영상 제목 5
+								</div>
+								<div class="rec-channel" id="out-rec-channel-5">채널명</div>
+								<div class="rec-meta">
+									<div class="meta-icon">
+										<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+											aria-hidden="true" style="
+                        pointer-events: none;
+                        display: inherit;
+                        width: 100%;
+                        height: 100%;
+                      ">
+											<path
+												d="M5 4.623v14.755a1.5 1.5 0 002.261 1.294l12.766-7.51L22 12.002l-1.973-1.162L7.26 3.33A1.5 1.5 0 005 4.623Zm2 13.88V5.497L18.056 12 7 18.503Z">
+											</path>
+										</svg>
+									</div>
+									<div id="out-rec-views-5" class="inline-field">조회수</div> · <div id="out-rec-time-5"
+										class="inline-field">업로드 시점</div>
+								</div>
+								<div class="rec-badge">새 동영상</div>
+							</div>
+						</div>
+						<div class="rec-item">
+							<div class="rec-thumb img-editable" id="out-rec-thumb-6">
+								<div class="img-fill" id="img-rec-thumb-6"></div>
+							</div>
+							<div class="rec-info">
+								<div class="rec-title" id="out-rec-title-6">
+									추천 영상 제목 6
+								</div>
+								<div class="rec-channel" id="out-rec-channel-6">채널명</div>
+								<div class="rec-meta">
+									<div class="meta-icon">
+										<svg width="24" height="24" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg"
+											aria-hidden="true" style="
+                      pointer-events: none;
+                      display: inherit;
+                      width: 100%;
+                      height: 100%;
+                    ">
+											<path
+												d="M5 4.623v14.755a1.5 1.5 0 002.261 1.294l12.766-7.51L22 12.002l-1.973-1.162L7.26 3.33A1.5 1.5 0 005 4.623Zm2 13.88V5.497L18.056 12 7 18.503Z">
+											</path>
+										</svg>
+									</div>
+									<div id="out-rec-views-6" class="inline-field">조회수</div> · <div id="out-rec-time-6"
+										class="inline-field">업로드 시점</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</sidebar>
+			</main>
+		</div>
+	</div>
+
+	<!-- 초기화 확인 모달 -->
+	<div class="modal-overlay" id="resetModalOverlay">
+		<div class="modal-box">
+			<p class="modal-title">정말 초기화하시겠습니까?</p>
+			<p class="modal-desc">
+				이미지, 색상, 내용 등 모든 설정이 처음 상태로
+				되돌아가며 되돌릴 수 없습니다.
+			</p>
+			<div class="modal-actions">
+				<button class="modalBtn cancel" onclick="cancelReset()">
+					아니오
+				</button>
+				<button class="modalBtn confirm" onclick="confirmReset()">
+					예
+				</button>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
